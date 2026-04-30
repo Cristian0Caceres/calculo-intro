@@ -1,2 +1,9 @@
-# calculo intro
+Modulo de 11:https://validarutchile.cl/como-calcular-el-digito-verificador-del-rut-de-forma-manual-utilizando-el-algoritmo-del-modulo-11/
+conicas: https://personales.unican.es/alvareze/CalculoWeb/CalculoI/matex/conicas.pdf
+Rut estandar para pruebas:12.345.678-5
+Digito verificador esperado en los testeos : 5
 
+
+posibles tecnologias a usar: matplotlib, python, sympy, ploty, conics
+
+tecnologias prhibidas: numpy, math, sympy u otras equivalentes
