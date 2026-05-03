@@ -21,11 +21,3 @@ def calcular_modulo11(lista_digitos):
         dv = str(resultado)
 
     return dv
-
-
-# ---- Ejemplo de uso ----
-rut = [1, 1, 6, 8, 9, 4, 9, 4]
-
-dv = calcular_modulo11(rut)
-
-print(f"RUT: {''.join(map(str, rut))}-{dv}")
