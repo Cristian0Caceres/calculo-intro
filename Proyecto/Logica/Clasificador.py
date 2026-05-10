@@ -135,7 +135,7 @@ if __name__ == "__main__":
     for A,C,D,E,F,esperado in casos:
         resultado = descripcion_completa(A,C,D,E,F)
         tipo = resultado["tipo"]
-        ok ="Correctooooo!!!!!!!!!!" if tipo == esperado else "neeeeh Esta mal, esta mal en algo"
+        ok ="Correctooooo!!!!!!!!!!" if tipo == esperado else "neeeeh Esta mal, ¿en que esta mal si puse todo bien?, esta mal en algo"
         print(f"\n{ok} Ecuacion: {resultado['ecuacion']}")
         print(f"    tipo Obtenido : {tipo}     ")
         print(f"    tipo esperado : {esperado} ")
