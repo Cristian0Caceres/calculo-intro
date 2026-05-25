@@ -113,8 +113,20 @@ def construye_coeficientes(Digitos):
     # Desempaquetar los primeros 7 dígitos (d8 se ignora si sobra)
     d1, d2, d3, d4, d5, d6, d7, *_ = Digitos
 
+    
     # Cálculo de cada coeficiente según la fórmula de la cónica
-    A = d1 + 1
+    if d1 == 0:
+        A = 0
+    elif d1 % 2 == 0:
+        A = d1 + 1
+    else:
+        A = -(d1 + 1)
+    if d2 == 0:
+        C=0
+    elif d2 % 2 == 0:
+        c= d2 + 1
+    else:
+        c= -(d2 + 1)
     C = d2 + 1
     D = -(d3 * 2)
     E = -(d4 * 2)
@@ -122,15 +134,14 @@ def construye_coeficientes(Digitos):
 
     # Texto explicativo del proceso de cálculo de cada coeficiente
     Descripcion = (
-        f"A = d1 + 1 = {d1} + 1 = {A}\n"
-        f"C = d2 + 1 = {d2} + 1 = {C}\n"
+        f"A = {'+(d1+1)' if d1%2==0 else '-(d1+1)'} = {A}  (d1={'par, positivo' if d1%2==0 else 'impar, negativo'})\n"
+        f"C = {'0 (parabola)' if d2==0 else ('+(d2+1)' if d2%2==0 else '-(d2+1)')} = {C}\n"
         f"D = -(d3 x 2) = -({d3} x 2) = {D}\n"
         f"E = -(d4 x 2) = -({d4} x 2) = {E}\n"
         f"F = d5 + d6 - d7 = {d5} + {d6} - {d7} = {F}"
     )
 
     return {"A": A, "C": C, "D": D, "E": E, "F": F, "descripcion": Descripcion}
-
 
 #----------------------------------------------------------
 # Función principal que integra todo el flujo:
