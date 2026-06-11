@@ -448,7 +448,7 @@ def parabola(A, C, D, E, F):
 
         vertices  = (_fmt(h), _fmt(k))
         foco      = (_fmt(h + p), _fmt(k))       # el foco está p unidades a la derecha del vértice
-        directriz = f"y = {_fmt(h - p)}"          # la directriz está p unidades a la izquierda
+        directriz = f"x = {_fmt(h - p)}"          # la directriz está p unidades a la izquierda
         eje       = "Horizontal"
         forma     = f"(y-{_fmt(k)})**2 = {_fmt(cuatro_p)} * (x-{_fmt(h)})"
 

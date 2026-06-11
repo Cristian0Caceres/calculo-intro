@@ -50,7 +50,7 @@ def _clasificar_iterno(A, C):
     producto = A * C
     if A == 0 and C == 0:
         return (
-            "No valida",
+            "Invalida",
             f"A = {A} y C = {C}.\n"
             "Como ambos coeficientes cuadraticos son 0, "
             "la ecuacion no representa una conica real valida.\n"
@@ -95,9 +95,9 @@ def _clasificar_iterno(A, C):
     return (
         "hiperbola",
         f"A = {A}, C = {C}.\n"
-        f"como A * c = {A} * {C} = {producto} < 0,\n"
+        f"como A * C = {A} * {C} = {producto} < 0,\n"
         "los coeficientes tiene signos opuestos. \n"
-        "-> la conica es una hipertbola.",
+        "-> la conica es una hiperbola.",
     )
 
 
@@ -123,7 +123,7 @@ def descripcion_completa(A, C, D, E, F):
     return {
         "tipo": tipo,
         "razon": razon,
-        "valida": tipo != "degenerada",
+        "valida": tipo != "Invalida",
         "ecuacion": _formatear_ecuacion(A, C, D, E, F),
     }
 
