@@ -427,7 +427,7 @@ def parabola(A, C, D, E, F):
         if D == 0:
             return _error("parabola", "D = 0 con A = 0 -> parabola degenerada")
 
-        pasos.append("A = 0, C =/ 0 -> eje HORIZONTAL: (y-h)**2 = 4p*(x-k)")
+        pasos.append("A = 0, C =/ 0 -> eje HORIZONTAL: (y-k)**2 = 4p*(x-h)")
         k, sobrante = completar_cuadrado(C, E)   # completa cuadrado en y (variable cuadrática)
 
         pasos.append(
