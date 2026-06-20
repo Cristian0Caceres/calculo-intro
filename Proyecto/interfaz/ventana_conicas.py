@@ -76,8 +76,8 @@ class VentanaConicas(ctk.CTkFrame):
         self._entradas_defensa = {}
 
         self._construir_encabezado()
-        self._construir_cuerpo()
         self._construir_zona_defensa_y_grafica()
+        self._construir_cuerpo()
 
     # ── Encabezado ────────────────────────────────────────────────────────────
 
@@ -105,66 +105,70 @@ class VentanaConicas(ctk.CTkFrame):
     def _construir_cuerpo(self):
         marco = ctk.CTkFrame(self, fg_color=_PANEL, corner_radius=12,
                              border_width=1, border_color=_BORDE)
-        marco.pack(fill="both", expand=True, padx=18, pady=6)
+        marco.pack(fill="x", padx=18, pady=(6, 16))
 
-        ctk.CTkLabel(marco,
+        fila_titulo = ctk.CTkFrame(marco, fg_color="transparent")
+        fila_titulo.pack(fill="x", padx=14, pady=(10, 4))
+        ctk.CTkLabel(fila_titulo,
                      text="Desarrollo Matemático — General → Canónica → General",
                      font=_F_BOLD, text_color=_ACENTO
-                     ).pack(anchor="w", padx=14, pady=(12, 4))
+                     ).pack(side="left")
+        ctk.CTkLabel(fila_titulo, text="(detalle de referencia)",
+                     font=("Segoe UI", 10), text_color=_DIMMED
+                     ).pack(side="left", padx=(8, 0))
         ctk.CTkFrame(marco, height=1, fg_color=_BORDE).pack(fill="x", padx=14, pady=(0, 6))
 
         self._textbox = ctk.CTkTextbox(marco, font=_F_MONO, fg_color=_ENTRY_FONDO,
                                        text_color=_TEXTO, border_width=0,
                                        activate_scrollbars=True, wrap="word",
-                                       state="disabled")
-        self._textbox.pack(fill="both", expand=True, padx=14, pady=(0, 14))
+                                       state="disabled", height=160)
+        self._textbox.pack(fill="x", padx=14, pady=(0, 14))
 
     # ── Zona inferior: campos defensa oral + gráfica ─────────────────────────
 
     def _construir_zona_defensa_y_grafica(self):
         marco = ctk.CTkFrame(self, fg_color=_PANEL, corner_radius=12,
                              border_width=1, border_color=_BORDE)
-        marco.pack(fill="x", padx=18, pady=(6, 16))
+        marco.pack(fill="both", expand=True, padx=18, pady=(6, 6))
 
         # Fila de título + botón gráfica
         fila = ctk.CTkFrame(marco, fg_color="transparent")
-        fila.pack(fill="x", padx=14, pady=(10, 0))
+        fila.pack(fill="x", padx=16, pady=(14, 0))
         ctk.CTkLabel(fila, text="Visualización y Defensa Oral",
-                     font=_F_BOLD, text_color=_TEXTO).pack(side="left")
+                     font=("Segoe UI", 14, "bold"), text_color=_TEXTO).pack(side="left")
         self._btn_graf = ctk.CTkButton(
-            fila, text="Generar Gráfica", font=("Segoe UI", 11, "bold"),
-            fg_color="#3A3F6B", hover_color="#4A509E",
-            width=150, command=self._solicitar_grafica, state="disabled"
+            fila, text="Generar Gráfica", font=("Segoe UI", 12, "bold"),
+            fg_color=_ACENTO, hover_color="#4A6BD8",
+            width=170, height=36, command=self._solicitar_grafica, state="disabled"
         )
         self._btn_graf.pack(side="right")
 
         # Contenedor horizontal: campos defensa (izq) | gráfica (der)
         contenedor = ctk.CTkFrame(marco, fg_color="transparent")
-        contenedor.pack(fill="x", padx=14, pady=(8, 14))
+        contenedor.pack(fill="both", expand=True, padx=16, pady=(10, 16))
 
         # Panel de campos de defensa oral (izquierda)
         self._panel_defensa = ctk.CTkFrame(contenedor, fg_color=_ENTRY_FONDO,
-                                           corner_radius=8, width=260)
-        self._panel_defensa.pack(side="left", fill="y", padx=(0, 8))
+                                           corner_radius=8, width=300)
+        self._panel_defensa.pack(side="left", fill="y", padx=(0, 10))
         self._panel_defensa.pack_propagate(False)
 
         ctk.CTkLabel(self._panel_defensa,
                      text="Completa durante la defensa oral:",
-                     font=("Segoe UI", 10, "bold"), text_color=_ACENTO2
-                     ).pack(anchor="w", padx=10, pady=(8, 4))
+                     font=("Segoe UI", 12, "bold"), text_color=_ACENTO2
+                     ).pack(anchor="w", padx=12, pady=(12, 6))
 
         self._frame_campos = ctk.CTkFrame(self._panel_defensa, fg_color="transparent")
-        self._frame_campos.pack(fill="both", expand=True, padx=6)
+        self._frame_campos.pack(fill="both", expand=True, padx=8)
 
-        # Zona de la gráfica (derecha)
+        # Zona de la gráfica (derecha) — protagonista del panel
         self.zona_grafica = ctk.CTkFrame(contenedor, fg_color=_ENTRY_FONDO,
-                                         corner_radius=8, height=220)
+                                         corner_radius=8)
         self.zona_grafica.pack(side="left", fill="both", expand=True)
-        self.zona_grafica.pack_propagate(False)
 
         self._ph_graf = ctk.CTkLabel(
             self.zona_grafica, text="La gráfica aparecerá aquí.",
-            font=("Segoe UI", 11), text_color=_DIMMED
+            font=("Segoe UI", 12), text_color=_DIMMED
         )
         self._ph_graf.place(relx=0.5, rely=0.5, anchor="center")
 
@@ -226,15 +230,15 @@ class VentanaConicas(ctk.CTkFrame):
 
         for etiqueta, _ in campos:
             ctk.CTkLabel(self._frame_campos, text=etiqueta,
-                         font=_F_LBL, text_color=_DIMMED
-                         ).pack(anchor="w", pady=(6, 0))
+                         font=("Segoe UI", 11), text_color=_DIMMED
+                         ).pack(anchor="w", pady=(8, 2))
             entry = ctk.CTkEntry(
                 self._frame_campos,
                 placeholder_text="Tu respuesta...",
-                width=220, font=_F_LBL,
+                width=260, height=32, font=("Segoe UI", 11),
                 fg_color=_PANEL, border_color=_BORDE
             )
-            entry.pack(anchor="w", pady=(0, 2))
+            entry.pack(anchor="w", pady=(0, 4))
             self._entradas_defensa[etiqueta] = entry
 
     def _escribir_textbox(self, texto):
