@@ -427,7 +427,7 @@ def parabola(A, C, D, E, F):
         if D == 0:
             return _error("parabola", "D = 0 con A = 0 -> parabola degenerada")
 
-        pasos.append("A = 0, C =/ 0 -> eje HORIZONTAL: (y-h)**2 = 4p*(x-k)")
+        pasos.append("A = 0, C =/ 0 -> eje HORIZONTAL: (y-k)**2 = 4p*(x-h)")
         k, sobrante = completar_cuadrado(C, E)   # completa cuadrado en y (variable cuadrática)
 
         pasos.append(
@@ -448,7 +448,7 @@ def parabola(A, C, D, E, F):
 
         vertices  = (_fmt(h), _fmt(k))
         foco      = (_fmt(h + p), _fmt(k))       # el foco está p unidades a la derecha del vértice
-        directriz = f"y = {_fmt(h - p)}"          # la directriz está p unidades a la izquierda
+        directriz = f"x = {_fmt(h - p)}"          # la directriz está p unidades a la izquierda
         eje       = "Horizontal"
         forma     = f"(y-{_fmt(k)})**2 = {_fmt(cuatro_p)} * (x-{_fmt(h)})"
 

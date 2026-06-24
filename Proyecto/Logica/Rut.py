@@ -1,194 +1,248 @@
-# ----------------------------------------------------------
-# Este módulo se encarga de la validación del RUT
-# y la construcción de coeficientes a partir de este mismo
-# ----------------------------------------------------------
+# =============================================================================
+# Rut.py — Validación de RUT y construcción de coeficientes de cónica
+# =============================================================================
+# La construcción de coeficientes sigue EXACTAMENTE la fórmula del enunciado:
+#
+#   A = (d1+d2)/v    B = (d3+d4)/v    C = -(d5+d6)
+#   D = -(d7+d8)     E =  d1+d3+d5+d7
+#
+# donde v se obtiene del dígito verificador (DV).
+#
+# La nomenclatura interna del proyecto (usada en conicas.py y Clasificador.py)
+# mapea así respecto al PDF:
+#
+#   PDF → interno
+#   A   → A   (coeficiente de x²)
+#   B   → C   (coeficiente de y²)
+#   C   → D   (coeficiente de x)
+#   D   → E   (coeficiente de y)
+#   E   → F   (término constante)
+# =============================================================================
 
-# Tabla de traducción reutilizable para eliminar puntos y guiones del RUT
 _Tabla_Limpieza = str.maketrans("", "", ".-")
-
-# Secuencia de multiplicadores usada en el cálculo del Módulo 11
-_secuencia = (2, 3, 4, 5, 6, 7)
+_secuencia      = (2, 3, 4, 5, 6, 7)
 
 
-#----------------------------------------------------------
-# Elimina puntos, guiones y espacios del RUT,
-# y convierte todo a mayúsculas para normalizar el formato
-#----------------------------------------------------------
 def limpiar_rut(rut):
     return rut.strip().translate(_Tabla_Limpieza).upper()
 
 
-#----------------------------------------------------------
-# Calcula el dígito verificador esperado usando el algoritmo
-# oficial del Módulo 11, utilizado por el Registro Civil de Chile.
-# Recibe el cuerpo numérico del RUT (sin DV) como string.
-# Retorna: "K", "0", o un dígito del 1 al 9 como string.
-#----------------------------------------------------------
-def Modulo11(Cuerpo):
-    # Multiplica cada dígito (de derecha a izquierda) por su factor de la secuencia
+def Modulo11(cuerpo):
+    """
+    Algoritmo oficial del Módulo 11 para calcular el DV esperado.
+    Multiplica cada dígito (de derecha a izquierda) por la secuencia 2-7
+    de forma cíclica, suma los productos y calcula: DV = 11 − (suma % 11).
+    Casos especiales: resultado 11 → '0', resultado 10 → 'K'.
+    """
     suma = sum(
         int(d) * _secuencia[i % 6]
-        for i, d in enumerate(reversed(Cuerpo))
+        for i, d in enumerate(reversed(cuerpo))
     )
-    # Calcula el DV restando el residuo de la división por 11
-    DV = 11 - (suma % 11)
-    # Casos especiales: 11 → "0", 10 → "K", resto → dígito normal
-    return "0" if DV == 11 else "K" if DV == 10 else str(DV)
+    dv = 11 - (suma % 11)
+    return "0" if dv == 11 else "K" if dv == 10 else str(dv)
 
 
-#----------------------------------------------------------
-# Valida un RUT completo de forma integral:
-# limpia el formato, separa el cuerpo del DV,
-# verifica que el cuerpo sea numérico, que el DV sea válido,
-# y compara el DV ingresado con el calculado por Módulo 11.
-# Retorna un diccionario con el resultado de la validación.
-#----------------------------------------------------------
-def Valid_Rut(Rut):
-    Rut_Limpio = limpiar_rut(Rut)
+def Valid_Rut(rut):
+    rut_limpio = limpiar_rut(rut)
+    resultado  = {"valido": False, "cuerpo": "", "dv_dado": "",
+                  "dv_calculado": "", "mensaje": ""}
 
-    # Estructura de resultado con valores por defecto
-    Resultado = {
-        "valido": False,
-        "cuerpo": "",
-        "dv_dado": "",
-        "dv_calculado": "",
-        "mensaje": ""
-    }
+    if len(rut_limpio) < 2:
+        resultado["mensaje"] = "RUT demasiado corto."
+        return resultado
 
-    # Verificación mínima de longitud (al menos 1 dígito + 1 DV)
-    if len(Rut_Limpio) < 2:
-        Resultado["mensaje"] = "Rut demasiado corto."
-        return Resultado
+    cuerpo, dv_dado = rut_limpio[:-1], rut_limpio[-1]
+    resultado["cuerpo"]   = cuerpo
+    resultado["dv_dado"]  = dv_dado
 
-    # Separar el cuerpo (todos los caracteres menos el último) y el DV (último carácter)
-    Cuerpo, DV_Dado = Rut_Limpio[:-1], Rut_Limpio[-1]
-    Resultado["cuerpo"] = Cuerpo
-    Resultado["dv_dado"] = DV_Dado
+    if not cuerpo.isdigit():
+        resultado["mensaje"] = f"El cuerpo '{cuerpo}' contiene caracteres no numéricos."
+        return resultado
 
-    # Verificar que el cuerpo contenga solo dígitos
-    if not Cuerpo.isdigit():
-        Resultado["mensaje"] = f"El cuerpo '{Cuerpo}' no es válido."
-        return Resultado
+    if dv_dado not in "0123456789K":
+        resultado["mensaje"] = f"Dígito verificador '{dv_dado}' no es válido."
+        return resultado
 
-    # Verificar que el DV sea un dígito del 0 al 9 o la letra K
-    if DV_Dado not in "0123456789K":
-        Resultado["mensaje"] = f"Dígito verificador '{DV_Dado}' no válido."
-        return Resultado
+    dv_calc = Modulo11(cuerpo)
+    resultado["dv_calculado"] = dv_calc
 
-    # Calcular el DV esperado y compararlo con el ingresado
-    DV_Calc = Modulo11(Cuerpo)
-    Resultado["dv_calculado"] = DV_Calc
-
-    if DV_Dado == DV_Calc:
-        Resultado["valido"] = True
-        Resultado["mensaje"] = f"RUT válido. DV correcto: {DV_Calc}"
+    if dv_dado == dv_calc:
+        resultado["valido"]  = True
+        resultado["mensaje"] = f"RUT válido. DV correcto: {dv_calc}"
     else:
-        Resultado["mensaje"] = (
-            f"RUT inválido. DV ingresado: {DV_Dado} — DV esperado: {DV_Calc}"
+        resultado["mensaje"] = (
+            f"RUT inválido. DV ingresado: {dv_dado} — DV esperado: {dv_calc}"
+        )
+    return resultado
+
+
+def Extrae_Digitos(rut):
+    """
+    Devuelve lista de 8 enteros con los dígitos del cuerpo del RUT.
+    Si el cuerpo tiene menos de 8 cifras se rellena con ceros a la izquierda.
+    """
+    cuerpo = limpiar_rut(rut)[:-1].zfill(8)[:8]
+    return [int(c) for c in cuerpo]
+
+
+def _calcular_v(dv_str):
+    """
+    Convierte el dígito verificador en la variable auxiliar v:
+        DV = 'K' → v = 10
+        DV = '0' → v = 11
+        DV = '1'..'9' → v = int(DV)
+    """
+    if dv_str == "K":
+        return 10
+    if dv_str == "0":
+        return 11
+    return int(dv_str)
+
+
+def construye_coeficientes(digitos, dv_str):
+    """
+    Construye los coeficientes de la ecuación general de la cónica
+    siguiendo el enunciado (Fase 1):
+
+        A·x² + B·y² + C·x + D·y + E = 0   (nomenclatura del PDF)
+
+    Fórmulas base:
+        A = (d1+d2) / v
+        B = (d3+d4) / v
+        C = -(d5+d6)
+        D = -(d7+d8)
+        E =  d1+d3+d5+d7
+
+    Ajustes (mutuamente excluyentes entre sí en el orden indicado):
+        1. Si d1 == d2          → B = A              (circunferencia forzada)
+        2. Si (d5+d6) % 3 == 0 → parábola forzada:
+               d7 par   → B = 0
+               d7 impar → A = 0
+        Si NO se aplicó ninguno de los ajustes anteriores:
+        3. Si d8 es impar       → B = −B             (permite hipérbola)
+
+    Los coeficientes se devuelven con la NOMENCLATURA INTERNA del proyecto
+    para ser compatibles con conicas.py y Clasificador.py:
+        A_int = A del PDF  (coef x²)
+        C_int = B del PDF  (coef y²)   ← nombre interno 'C'
+        D_int = C del PDF  (coef x)    ← nombre interno 'D'
+        E_int = D del PDF  (coef y)    ← nombre interno 'E'
+        F_int = E del PDF  (constante) ← nombre interno 'F'
+    """
+    d1, d2, d3, d4, d5, d6, d7, d8 = digitos[:8]
+    v = _calcular_v(dv_str)
+
+    # ── Valores base según fórmulas del enunciado ─────────────────────────────
+    A = (d1 + d2) / v
+    B = (d3 + d4) / v
+    C = -(d5 + d6)
+    D = -(d7 + d8)
+    E =  d1 + d3 + d5 + d7
+
+    pasos_ajuste   = []
+    ajuste_aplicado = False   # bandera para el ajuste 3
+
+    # ── Ajuste 1: circunferencia forzada ──────────────────────────────────────
+    if d1 == d2:
+        B = A
+        ajuste_aplicado = True
+        pasos_ajuste.append(
+            f"Ajuste 1: d1 = d2 = {d1}  →  B = A = {A:.4f}  (circunferencia forzada)"
         )
 
-    return Resultado
+    # ── Ajuste 2: parábola forzada ────────────────────────────────────────────
+    elif (d5 + d6) % 3 == 0:
+        ajuste_aplicado = True
+        if d7 % 2 == 0:
+            B = 0
+            pasos_ajuste.append(
+                f"Ajuste 2: (d5+d6) = {d5+d6} es múltiplo de 3 y d7 = {d7} es par  "
+                f"→  B = 0  (parábola de eje vertical)"
+            )
+        else:
+            A = 0
+            pasos_ajuste.append(
+                f"Ajuste 2: (d5+d6) = {d5+d6} es múltiplo de 3 y d7 = {d7} es impar  "
+                f"→  A = 0  (parábola de eje horizontal)"
+            )
 
+    # ── Ajuste 3: hipérbola (solo si no hubo ajuste 1 ni 2) ──────────────────
+    if not ajuste_aplicado and d8 % 2 != 0:
+        B = -B
+        pasos_ajuste.append(
+            f"Ajuste 3: d8 = {d8} es impar  →  B = −B = {B:.4f}  (permite hipérbola)"
+        )
 
-#----------------------------------------------------------
-# Extrae los primeros 8 dígitos del cuerpo del RUT.
-# Si el cuerpo tiene menos de 8 dígitos, rellena con ceros
-# a la izquierda para mantener una longitud fija.
-# Retorna una lista de enteros.
-#----------------------------------------------------------
-def Extrae_Digitos(Rut):
-    # Eliminar DV, rellenar con ceros y tomar solo los primeros 8 dígitos
-    Cuerpo = limpiar_rut(Rut)[:-1].zfill(8)[:8]
-    return [int(c) for c in Cuerpo]
+    if not pasos_ajuste:
+        pasos_ajuste.append("Sin ajustes: se mantienen los valores base.")
 
-
-#----------------------------------------------------------
-# Construye los coeficientes A, C, D, E, F de la ecuación
-# general de una cónica a partir de los dígitos del RUT.
-# Cada coeficiente se forma con una operación específica
-# sobre los dígitos d1 a d7.
-# Retorna un diccionario con los coeficientes y su descripción.
-#----------------------------------------------------------
-def construye_coeficientes(Digitos):
-    # Desempaquetar los primeros 7 dígitos (d8 se ignora si sobra)
-    d1, d2, d3, d4, d5, d6, d7, *_ = Digitos
-
-    
-    # Cálculo de cada coeficiente según la fórmula de la cónica
-    if d1 == 0:
-        A = 0
-    elif d1 % 2 == 0:
-        A = d1 + 1
-    else:
-        A = -(d1 + 1)
-    if d2 == 0:
-        C=0
-    elif d2 % 2 == 0:
-        c= d2 + 1
-    else:
-        c= -(d2 + 1)
-    C = d2 + 1
-    D = -(d3 * 2)
-    E = -(d4 * 2)
-    F = d5 + d6 - d7
-
-    # Texto explicativo del proceso de cálculo de cada coeficiente
-    Descripcion = (
-        f"A = {'+(d1+1)' if d1%2==0 else '-(d1+1)'} = {A}  (d1={'par, positivo' if d1%2==0 else 'impar, negativo'})\n"
-        f"C = {'0 (parabola)' if d2==0 else ('+(d2+1)' if d2%2==0 else '-(d2+1)')} = {C}\n"
-        f"D = -(d3 x 2) = -({d3} x 2) = {D}\n"
-        f"E = -(d4 x 2) = -({d4} x 2) = {E}\n"
-        f"F = d5 + d6 - d7 = {d5} + {d6} - {d7} = {F}"
+    # ── Descripción paso a paso para la interfaz ──────────────────────────────
+    descripcion = (
+        f"Variable auxiliar:\n"
+        f"  DV = '{dv_str}'  →  v = {v}\n\n"
+        f"Fórmulas base (nomenclatura del enunciado):\n"
+        f"  A = (d1+d2)/v = ({d1}+{d2})/{v} = {(d1+d2)/v:.4f}\n"
+        f"  B = (d3+d4)/v = ({d3}+{d4})/{v} = {(d3+d4)/v:.4f}\n"
+        f"  C = -(d5+d6)  = -({d5}+{d6})    = {-(d5+d6)}\n"
+        f"  D = -(d7+d8)  = -({d7}+{d8})    = {-(d7+d8)}\n"
+        f"  E =  d1+d3+d5+d7 = {d1}+{d3}+{d5}+{d7} = {d1+d3+d5+d7}\n\n"
+        f"Ajustes aplicados:\n"
+        + "\n".join(f"  • {p}" for p in pasos_ajuste) +
+        f"\n\nCoeficientes finales (nomenclatura interna del proyecto):\n"
+        f"  A (coef x²) = {A:.4f}\n"
+        f"  C (coef y²) = {B:.4f}\n"
+        f"  D (coef x)  = {C}\n"
+        f"  E (coef y)  = {D}\n"
+        f"  F (cte)     = {E}\n"
     )
 
-    return {"A": A, "C": C, "D": D, "E": E, "F": F, "descripcion": Descripcion}
-
-#----------------------------------------------------------
-# Función principal que integra todo el flujo:
-# valida el RUT y, si es válido, extrae sus dígitos
-# y construye los coeficientes de la cónica.
-# Retorna un diccionario con validación, dígitos y coeficientes.
-#----------------------------------------------------------
-def Procesar_Rut(Rut):
-    Validacion = Valid_Rut(Rut)
-
-    # Si el RUT no es válido, retornar solo la validación sin coeficientes
-    if not Validacion["valido"]:
-        return {"validacion": Validacion, "digitos": [], "coeficientes": {}}
-
-    # Extraer dígitos y construir coeficientes solo si el RUT es válido
-    Digitos = Extrae_Digitos(Rut)
     return {
-        "validacion": Validacion,
-        "digitos": Digitos,
-        "coeficientes": construye_coeficientes(Digitos)
+        "A": A,   # coef x²  (A del PDF)
+        "C": B,   # coef y²  (B del PDF) — nombre interno 'C'
+        "D": C,   # coef x   (C del PDF) — nombre interno 'D'
+        "E": D,   # coef y   (D del PDF) — nombre interno 'E'
+        "F": E,   # cte      (E del PDF) — nombre interno 'F'
+        "v": v,
+        "descripcion": descripcion,
     }
 
 
-# ------------------------------------------------------------------
-# Testeo
-# ------------------------------------------------------------------
+def Procesar_Rut(rut):
+    """
+    Flujo completo: valida el RUT y, si es válido, extrae dígitos
+    y construye los coeficientes de la cónica.
+    """
+    validacion = Valid_Rut(rut)
+    if not validacion["valido"]:
+        return {"validacion": validacion, "digitos": [], "coeficientes": {}}
 
+    digitos = Extrae_Digitos(rut)
+    dv_str  = limpiar_rut(rut)[-1]
+
+    return {
+        "validacion":   validacion,
+        "digitos":      digitos,
+        "coeficientes": construye_coeficientes(digitos, dv_str),
+    }
+
+
+# =============================================================================
+# BLOQUE DE PRUEBA
+# =============================================================================
 if __name__ == "__main__":
     ruts_prueba = [
-        "12.345.678-9",
-        "17.654.321-K",
-        "11111111-1",
-        "99999999-9",
+        ("11.111.111-1", "d1==d2 → circunferencia forzada"),
+        ("22.222.222-2", "d1==d2 → circunferencia forzada"),
+        ("14.765.432-6", "caso normal, verificar ajuste 3"),
+        ("12.678.941-4", "(d5+d6) múltiplo de 3 → parábola"),
     ]
 
-    for rut in ruts_prueba:
-        print("=" * 50)
-        print(f"RUT ingresado : {rut}")
-
-        resultado = Procesar_Rut(rut)
-        v = resultado["validacion"]
-
-        print(f"Limpio        : {limpiar_rut(rut)}")
-        print(f"Válido        : {v['valido']}")
-        print(f"Mensaje       : {v['mensaje']}")
-
-        if resultado["digitos"]:
-            print(f"Dígitos       : {resultado['digitos']}")
-            print("Coeficientes  :")
-            print(resultado["coeficientes"]["descripcion"])
+    for rut, caso in ruts_prueba:
+        print("=" * 60)
+        print(f"RUT: {rut}  [{caso}]")
+        res = Procesar_Rut(rut)
+        v   = res["validacion"]
+        print(f"  Válido: {v['valido']}  |  {v['mensaje']}")
+        if res["digitos"]:
+            print(f"  Dígitos: {res['digitos']}")
+            print(res["coeficientes"]["descripcion"])
