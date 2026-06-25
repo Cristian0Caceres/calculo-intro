@@ -1,0 +1,11 @@
+Rut       / circunferencia          / limite
+216272005 [no]                      [removible]
+116894947 [circunferencia]          [salto]
+108753048 [elipse]                  [salto]
+217699576 [parabola horizontal]     [salto]
+200804635 [Hiperbola]               [removible]
+215328058 [hiperbola]               [infinitas]
+227130563 [circunferencia]          [removible]
+26558571K [hiperbola]               [salto]
+216463064 [parabola vertical]       [removible]
+216717643 [elipse]                  [salto]

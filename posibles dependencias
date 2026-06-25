@@ -1,10 +1,3 @@
 Posibles tecnologias a usar
 
 customtkinter — widgets modernos sobre Tkinter
-
-matplotlib — SOLO para graficar (no cálculos)
-
-pillow — manejo de imágenes en la UI (opcional)
-
-tecnologias prohibidas
-numpy, math, sympy, scipy, pandas

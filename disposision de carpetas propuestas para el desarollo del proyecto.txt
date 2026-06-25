@@ -7,20 +7,20 @@ proyecto_mat1186/
 ├── README.md
 │
 ├── logica/
-│   ├── __init__.py
+│   ├
 │   ├── rut.py
 │   ├── clasificador.py
 │   ├── conicas.py
 │   └── limites.py
 │
 ├── interfaz/
-│   ├── __init__.py
+│   ├
 │   ├── ventana_rut.py
 │   ├── ventana_conicas.py
 │   ├── ventana_limites.py
 │   └── graficador.py
 │
 └── tests/
-    ├── __init__.py
+    ├
     ├── test_rut.py
     └── test_conicas.py
